@@ -1,5 +1,7 @@
 from requests_html import HTMLSession
-import time
+from multiprocessing import Pool
+import os, threading, time
+
 session = HTMLSession()
 proxie = {
     'http': 'http://127.0.0.1:1080',
@@ -64,23 +66,37 @@ def get_img_list(page_list):
     print('获取图片列表完成')
     return img_list
 
+def saver(mkpath, img_url, n ,total):
+    res = session.get(img_url,proxies=proxie,headers=headers)
+    # print(res.content)
+    with open(mkpath + '\\%03d.jpg' % n,'wb') as f:
+        f.write(res.content)
+    print('第%03d页下载完成/共%03d页' % (n,total))
+
 def save(img_urls,title):
     n = 1
     mkpath = 'f:\\comic\\' + title
+    total = len(img_urls)
     mkdir(mkpath)
     for img_url in img_urls:
-        res = session.get(img_url,proxies=proxie,headers=headers)
-        # print(res.content)
-        with open(mkpath + '\\%03d.jpg' % n,'wb') as f:
-            f.write(res.content)
-        total = len(img_urls)
-        print('第%03d页下载完成/共%03d页' % (n,total))
+        t = threading.Thread(target=saver,args=(img_url,mkpath,n,total))
+        t.start()
+        t.join()
         n += 1
+
+def run(url):
+    title,page_list = get_page_list(url)
+    imgurls = get_img_list(page_list)
+    save(imgurls,title)
+
 
 if __name__ == '__main__':
     url_list = duqu()
+    p = Pool(8)
+    print('begin')
     for url in url_list:
         url = url.strip()
-        title,page_list = get_page_list(url)
-        imgurls = get_img_list(page_list)
-        save(imgurls,title)
+        p.apply_async(run,args=(url,))
+    p.close()
+    p.join()
+    print('All finished!!!')
