@@ -10,6 +10,12 @@ headers = {
     # 'Cookie': '__cfduid=d38a3b9c5846e5db96ef23a5eb78642e91530061695'
 }
 
+def duqu():
+    with open('list.txt', 'r') as f:
+        url_list = f.readlines()
+    return url_list    
+    
+
 def mkdir(path):
     # 引入模块
     import os
@@ -72,6 +78,9 @@ def save(img_urls,title):
         n += 1
 
 if __name__ == '__main__':
-    title,page_list = get_page_list('http://www.177pic.info/html/2018/06/2138040.html')
-    imgurls = get_img_list(page_list)
-    save(imgurls,title)
+    url_list = duqu()
+    for url in url_list:
+        url = url.strip()
+        title,page_list = get_page_list(url)
+        imgurls = get_img_list(page_list)
+        save(imgurls,title)
