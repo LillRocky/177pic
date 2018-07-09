@@ -67,6 +67,7 @@ def get_img_list(page_list):
     return img_list
 
 def saver(mkpath, img_url, n ,total):
+    img_url = img_url.strip()
     res = session.get(img_url,proxies=proxie,headers=headers)
     # print(res.content)
     with open(mkpath + '\\%03d.jpg' % n,'wb') as f:
@@ -79,7 +80,7 @@ def save(img_urls,title):
     total = len(img_urls)
     mkdir(mkpath)
     for img_url in img_urls:
-        t = threading.Thread(target=saver,args=(img_url,mkpath,n,total))
+        t = threading.Thread(target=saver,args=(mkpath,img_url,n,total))
         t.start()
         t.join()
         n += 1
